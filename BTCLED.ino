@@ -3,12 +3,12 @@
 #include <ArduinoJson.h>
 #include <FastLED.h>
 
-const char* ssid = "YOURWLANDSSID";
-const char* password = "YOURWLANPW";
+const char* ssid = "YOURSSID";
+const char* password = "YOURPASSWORD";
 
 // LED-Konfiguration
 #define LED_PIN     5  // Der Pin, an dem die LEDs angeschlossen sind
-#define NUM_LEDS    60 // Anzahl der LEDs im Strip
+#define NUM_LEDS    10 // Anzahl der LEDs im Strip
 CRGB leds[NUM_LEDS];
 
 void setup() {
@@ -22,35 +22,47 @@ void setup() {
   Serial.println("Verbunden mit WiFi");
 
   FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
-  FastLED.setBrightness(50); // Einstellen der Helligkeit
+  FastLED.setBrightness(40); // Einstellen der Helligkeit
 }
 
 void loop() {
-  if ((WiFi.status() == WL_CONNECTED)) {
-    HTTPClient http;
-
-    http.begin("https://www.bitstamp.net/api/v2/ticker/btcusd");
-    int httpCode = http.GET();
-
-    if (httpCode > 0) {
-      String payload = http.getString();
-      DynamicJsonDocument doc(1024);
-      deserializeJson(doc, payload);
-
-      float percentChange24 = doc["percent_change_24"];
-      Serial.print("24-Stunden-Prozentänderung: ");
-      Serial.println(percentChange24, 2);
-
-      updateLEDColor(percentChange24);
-    }
-    else {
-      Serial.print("Fehler beim Abrufen der Daten, HTTP-Code: ");
-      Serial.println(httpCode);
-    }
-
-    http.end();
+  if (WiFi.status() != WL_CONNECTED) {
+    reconnectWiFi(); // Versuche, die WLAN-Verbindung wiederherzustellen
   }
+
+  HTTPClient http;
+  http.begin("https://www.bitstamp.net/api/v2/ticker/btcusd");
+  http.setTimeout(5000); // Setzt ein Timeout von 5000 Millisekunden
+
+  int httpCode = http.GET();
+
+  if (httpCode > 0) {
+    String payload = http.getString();
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, payload);
+
+    float percentChange24 = doc["percent_change_24"].as<float>();
+    Serial.print("24-Stunden-Prozentänderung: ");
+    Serial.println(percentChange24, 2);
+
+    updateLEDColor(percentChange24);
+  } else {
+    Serial.print("Fehler beim Abrufen der Daten, HTTP-Code: ");
+    Serial.println(httpCode);
+  }
+
+  http.end();
   delay(10000);
+}
+
+void reconnectWiFi() {
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("WLAN-Verbindung verloren. Versuche erneut...");
+    WiFi.disconnect();
+    WiFi.reconnect();
+  }
+  Serial.println("Verbunden mit WiFi");
 }
 
 void updateLEDColor(float percentChange) {
