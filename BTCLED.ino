@@ -4,7 +4,7 @@
 #include <FastLED.h>
 
 const char* ssid = "YOURSSID";
-const char* password = "YOURPASSWORD";
+const char* password = "YOURPW";
 
 // LED-Konfiguration
 #define LED_PIN     5  // Der Pin, an dem die LEDs angeschlossen sind
@@ -14,6 +14,8 @@ CRGB leds[NUM_LEDS];
 void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password);
+
+  WiFi.mode(WIFI_MODE_STA); // Setzt den WiFi-Modus auf Station
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -32,7 +34,7 @@ void loop() {
 
   HTTPClient http;
   http.begin("https://www.bitstamp.net/api/v2/ticker/btcusd");
-  http.setTimeout(5000); // Setzt ein Timeout von 5000 Millisekunden
+  http.setTimeout(8000); // Setzt ein Timeout von 5000 Millisekunden
 
   int httpCode = http.GET();
 
@@ -52,12 +54,12 @@ void loop() {
   }
 
   http.end();
-  delay(10000);
+  delay(60000); // Änderung: Warte 60 Sekunden (60000 Millisekunden)
 }
 
 void reconnectWiFi() {
   while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+    delay(5000); // Verlängerte Verzögerung, um dem Modul Zeit zu geben, sich zu erholen
     Serial.println("WLAN-Verbindung verloren. Versuche erneut...");
     WiFi.disconnect();
     WiFi.reconnect();
