@@ -1,11 +1,3 @@
-<p align="center">
-  <img src="https://purepng.com/public/uploads/medium/under-construction-xmt.png" />
-  <br>
-  <strong>Under Construction</strong>
-</p>
-
-
-
 
 # ESP32 Crypto Ticker with LED Display
 
