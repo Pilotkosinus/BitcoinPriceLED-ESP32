@@ -4,11 +4,11 @@
 #include <FastLED.h>
 
 const char* ssid = "YOURSSID";
-const char* password = "YOURPW";
+const char* password = "YOURWLANPW";
 
 // LED-Konfiguration
 #define LED_PIN     5  // Der Pin, an dem die LEDs angeschlossen sind
-#define NUM_LEDS    10 // Anzahl der LEDs im Strip
+#define NUM_LEDS    3 // Anzahl der LEDs im Strip
 CRGB leds[NUM_LEDS];
 
 void setup() {
